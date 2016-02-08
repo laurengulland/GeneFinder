@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# ptw -c --runner='python gene_finder.py'
 """
 Gene Finder - SoftDes Mini Project 1
 
@@ -46,7 +47,6 @@ def get_complement(nucleotide): #week 1
         return 'A'
     else:
         return None
-    pass
 
 
 def get_reverse_complement(dna): #week 1
@@ -68,7 +68,7 @@ def get_reverse_complement(dna): #week 1
         reverse+=get_complement(dna[i])
 
     return reverse
-    pass
+    
 
 
 def rest_of_ORF(dna): #week 1
@@ -89,7 +89,6 @@ def rest_of_ORF(dna): #week 1
                 return dna[:i]
     return dna
 
-    pass
 
 
 def find_all_ORFs_oneframe(dna): #week 1
@@ -115,7 +114,7 @@ def find_all_ORFs_oneframe(dna): #week 1
         else:
             i+=3
     return orfList
-    pass
+    
 
 
 def find_all_ORFs(dna): #week 1
@@ -135,7 +134,7 @@ def find_all_ORFs(dna): #week 1
     for i in range(0, 3):
         orfList.extend(find_all_ORFs_oneframe(dna[i:]))
     return orfList
-    pass
+    
 
 
 def find_all_ORFs_both_strands(dna): #week 1
@@ -151,7 +150,7 @@ def find_all_ORFs_both_strands(dna): #week 1
     orfList.extend(find_all_ORFs(dna))
     orfList.extend(find_all_ORFs(get_reverse_complement(dna)))
     return orfList
-    pass
+    
 
 
 def longest_ORF(dna): #week 2
@@ -160,8 +159,14 @@ def longest_ORF(dna): #week 2
     >>> longest_ORF("ATGCGAATGTAGCATCAAA")
     'ATGCTACATTCGCAT'
     """
-    # TODO: implement this
-    pass
+    orfList = find_all_ORFs_both_strands(dna)
+    longest = orfList[0]
+    for i in orfList:
+        if len(i)>len(longest):
+            longest = i
+    return longest
+
+
 
 
 def longest_ORF_noncoding(dna, num_trials): #week 2
@@ -171,8 +176,14 @@ def longest_ORF_noncoding(dna, num_trials): #week 2
         dna: a DNA sequence
         num_trials: the number of random shuffles
         returns: the maximum length longest ORF """
-    # TODO: implement this
-    pass
+    maxLength = 0
+    longestORF = ''
+    for i in range(0, num_trials):
+        orfTest = longest_ORF(shuffle_string(dna))
+        if len(orfTest)>maxLength:
+            longestORF = orfTest
+            maxLength= len(orfTest)
+    return longestORF
 
 
 def coding_strand_to_AA(dna): #week 2
@@ -189,8 +200,11 @@ def coding_strand_to_AA(dna): #week 2
         >>> coding_strand_to_AA("ATGCCCGCTTT")
         'MPA'
     """
-    # TODO: implement this
-    pass
+    aaStrand = ''
+    for i in range(0, len(dna)-2, 3):
+        aaStrand += aa_table[dna[i:i+3]]   
+    return aaStrand
+
 
 
 def gene_finder(dna): #week 2
@@ -199,8 +213,19 @@ def gene_finder(dna): #week 2
         dna: a DNA sequence
         returns: a list of all amino acid sequences coded by the sequence dna.
     """
-    # TODO: implement this
-    pass
+    threshold = len(longest_ORF_noncoding(dna, 1500))
+    orfList = find_all_ORFs_both_strands(dna)
+    aminoList=[]
+    for i in orfList:
+        if len(i)>= threshold:
+            aminoList.append(coding_strand_to_AA(i))
+    return aminoList
+
+from load import load_seq
+dna = load_seq("./data/X73525.fa")
+salmonellaGenes = gene_finder(dna) #produces list of candidate genes for the provided salmonella gene
+print salmonellaGenes
+
 
 if __name__ == "__main__":
     import doctest
